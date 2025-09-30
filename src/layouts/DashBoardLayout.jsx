@@ -1,4 +1,12 @@
-import { Outlet } from "react-router-dom";
+import {
+    FiCreditCard,
+    FiHome,
+    FiPackage,
+    FiSearch,
+    FiUser,
+} from "react-icons/fi";
+import { NavLink, Outlet } from "react-router-dom";
+import ProfastLogo from "../pages/shared/ProfastLogo/ProfastLogo";
 
 const DashBoardLayout = () => {
     return (
@@ -48,11 +56,46 @@ const DashBoardLayout = () => {
                 ></label>
                 <ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4">
                     {/* Sidebar content */}
+                    <ProfastLogo></ProfastLogo>
                     <li>
-                        <a href="/dashboard/myParcels">My Parcels</a>
+                        <NavLink
+                            to="/dashboard"
+                            className="flex items-center gap-2"
+                        >
+                            <FiHome /> Home
+                        </NavLink>
                     </li>
                     <li>
-                        <a>Sidebar Item 2</a>
+                        <NavLink
+                            to="/dashboard/myParcels"
+                            className="flex items-center gap-2"
+                        >
+                            <FiPackage /> My Parcels
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/dashboard/paymentHistory"
+                            className="flex items-center gap-2"
+                        >
+                            <FiCreditCard /> Payment History
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/dashboard/track"
+                            className="flex items-center gap-2"
+                        >
+                            <FiSearch /> Track a Package
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/dashboard/profile"
+                            className="flex items-center gap-2"
+                        >
+                            <FiUser /> Profile
+                        </NavLink>
                     </li>
                 </ul>
             </div>

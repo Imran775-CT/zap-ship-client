@@ -1,10 +1,13 @@
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../../hooks/useAuth";
 import useAxios from "../../../hooks/useAxios";
 import SocialLogin from "../SocialLogin/SocialLogin";
 
 const Register = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/";
     const {
         register,
         handleSubmit,
@@ -26,32 +29,22 @@ const Register = () => {
                 const userInfo = {
                     name: data.name,
                     email: data.email,
-                    profilePic:
-                        result.user.photoURL ||
-                        "https://i.ibb.co/placeholder.png",
                     role: "user", // default role
                     created_at: new Date().toISOString(),
                     last_log_in: new Date().toISOString(),
                 };
 
-                const userRes = await axiosInstance.post("/users", userInfo);
-                console.log(userRes.data);
-
-                // Backend এ পাঠানো (MongoDB/Firestore এ সেভ হবে)
-                fetch("http://localhost:5000/users", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(userInfo),
-                })
-                    .then((res) => res.json())
-                    .then((dbRes) => {
-                        console.log("User saved in DB:", dbRes);
-                    })
-                    .catch((dbErr) => {
-                        console.error("Error saving user in DB:", dbErr);
-                    });
+                try {
+                    // Backend এ পাঠানো (MongoDB/Firestore এ সেভ হবে)
+                    const userRes = await axiosInstance.post(
+                        "/users",
+                        userInfo
+                    );
+                    console.log("User saved in DB:", userRes.data);
+                    navigate(from);
+                } catch (dbErr) {
+                    console.error("Error saving user in DB:", dbErr);
+                }
             })
             .catch((error) => {
                 console.log("Error creating user:", error);

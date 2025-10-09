@@ -1,23 +1,20 @@
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
 const PrivateRoute = ({ children }) => {
-    const { user, loading } = useAuth(); // এখানে object destructuring
-    const location = useLocation();
-    const navigate = useNavigate();
-    const from = location.state?.from || "/";
+  const { user, loading } = useAuth();
+  const location = useLocation();
 
-    if (loading) {
-        return <span className="loading loading-spinner loading-xl"></span>;
-    }
+  if (loading) {
+    return <span className="loading loading-spinner loading-lg"></span>;
+  }
 
-    if (!user) {
-        return (
-            <Navigate state={{ from: location.pathname }} to="/login" replace />
-        );
-    }
+  if (!user) {
+    // 🔥 এই জায়গায় from state পাঠানো হচ্ছে
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
 
-    return children;
+  return children;
 };
 
 export default PrivateRoute;

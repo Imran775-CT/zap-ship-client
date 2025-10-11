@@ -15,6 +15,7 @@ import PrivateRoute from "../routes/PrivateRoute";
 import BeARider from "../pages/Dashboard/BeARider/BeARider";
 import PendingRiders from "../pages/Dashboard/PendingRiders/PendingRiders";
 import ActiveRiders from "../pages/Dashboard/ActiveRiders/ActiveRiders";
+import MakeAdmin from "../pages/Dashboard/MakeAdmin/MakeAdmin";
 
 export const router = createBrowserRouter([
   {
@@ -99,6 +100,10 @@ export const router = createBrowserRouter([
       {
         path: "activeRiders",
         Component: ActiveRiders,
+      },
+      {
+        path: "make-admin",
+        element: <MakeAdmin />,
       },
     ],
   },

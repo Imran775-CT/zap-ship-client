@@ -9,11 +9,9 @@ import Swal from "sweetalert2";
 const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const from = location.state?.from?.pathname || "/"; // আগের পেজ বা "/"
 
-  // ✅ আগের পেজ থেকে আসা লোকেশন ট্র্যাক করা
-  const from = location.state?.from?.pathname || "/";
-
-  const { createUser } = useAuth();
+  const { createUser, updateUserProfile, user } = useAuth();
   const axiosInstance = useAxios();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,7 +23,6 @@ const Register = () => {
     formState: { errors },
   } = useForm();
 
-  // ✅ প্রোফাইল ইমেজ হ্যান্ডেল
   const handleImageUpload = (event) => {
     const image = event.target.files[0];
     if (!image) return;
@@ -33,30 +30,33 @@ const Register = () => {
     console.log("Selected Image:", image);
   };
 
-  // ✅ ফর্ম সাবমিট
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-
     try {
       // 1️⃣ Create Firebase user
       const result = await createUser(data.email, data.password);
       console.log("User created:", result.user);
 
-      // 2️⃣ Prepare user data for backend
+      // 2️⃣ Update displayName in Firebase
+      if (data.name) {
+        await updateUserProfile(data.name, ""); // optional photoURL
+        console.log("Profile updated:", data.name);
+      }
+
+      // 3️⃣ Prepare user info for backend
       const userInfo = {
         name: data.name.trim(),
         email: data.email,
         role: "user",
         created_at: new Date().toISOString(),
         last_log_in: new Date().toISOString(),
-        // You can handle profileImage upload later
       };
+      console.log("Sending to backend:", userInfo);
 
-      // 3️⃣ Send user info to backend
-      const userRes = await axiosInstance.post("/users", userInfo);
-      console.log("User saved in DB:", userRes.data);
+      // 4️⃣ Send user info to backend
+      await axiosInstance.post("/users", userInfo);
 
-      // ✅ সফল রেজিস্ট্রেশনের পর
+      // ✅ Registration success
       Swal.fire({
         icon: "success",
         title: "Registration Successful!",
@@ -64,7 +64,7 @@ const Register = () => {
         confirmButtonColor: "#3085d6",
         confirmButtonText: "Continue",
       }).then(() => {
-        navigate(from, { replace: true }); // ✅ আগের পেজে রিডিরেক্ট করবে
+        navigate(from, { replace: true }); // আগের পেজে redirect
       });
     } catch (error) {
       console.error("Error during registration:", error);
@@ -102,10 +102,11 @@ const Register = () => {
               Name
             </label>
             <input
-              {...register("name", { required: "Name is required" })}
               type="text"
+              defaultValue={user?.displayName || ""}
+              {...register("name", { required: "Name is required" })}
               placeholder="Your Name"
-              className="input input-bordered w-full bg-gray-100"
+              className="w-full border rounded-lg p-3"
             />
             {errors.name && (
               <p className="text-red-600 text-sm mt-1">{errors.name.message}</p>

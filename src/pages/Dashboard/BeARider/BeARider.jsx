@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import useAuth from "../../../hooks/useAuth";
 import { useLoaderData } from "react-router-dom";
@@ -6,11 +6,12 @@ import Swal from "sweetalert2";
 import UseAxiosSecure from "../../../hooks/UseAxiosSecure";
 
 const BeARider = () => {
-  const { user } = useAuth(); // user থেকে displayName & email পাবো
+  const { user } = useAuth(); // Firebase user
   const serviceCenters = useLoaderData();
+  const axiosSecure = UseAxiosSecure();
 
   const [selectedRegion, setSelectedRegion] = useState("");
-  const axiosSecure = UseAxiosSecure();
+  const [defaultName, setDefaultName] = useState("");
 
   const {
     register,
@@ -18,6 +19,13 @@ const BeARider = () => {
     reset,
     formState: { errors },
   } = useForm();
+
+  useEffect(() => {
+    if (user?.displayName) {
+      setDefaultName(user.displayName);
+      console.log("Loaded user name:", user.displayName);
+    }
+  }, [user]);
 
   const regions = [...new Set(serviceCenters.map((c) => c.region))];
   const districts = serviceCenters
@@ -27,21 +35,24 @@ const BeARider = () => {
   const onSubmit = (data) => {
     const riderData = {
       ...data,
-      name: user?.displayName || "",
+      name: data.name || user?.displayName || "",
       email: user?.email || "",
-      status: "pending", // default status
+      status: "pending",
       created_at: new Date().toISOString(),
     };
+
     console.log("Rider Application Data:", riderData);
+
     axiosSecure.post("/riders", riderData).then((res) => {
       if (res.data.insertedId) {
         Swal.fire({
-          icon: "success", // icon type
-          title: "Application submitted!", // main title
+          icon: "success",
+          title: "Application submitted!",
           text: "Your application is pending approval.",
         });
       }
     });
+
     reset();
   };
 
@@ -58,11 +69,14 @@ const BeARider = () => {
             </label>
             <input
               type="text"
-              value={user?.displayName || ""}
-              readOnly
-              {...register("name")} // register still needed for form submission
-              className="w-full border rounded-lg p-3 bg-gray-100 cursor-not-allowed"
+              defaultValue={defaultName}
+              {...register("name", { required: "Name is required" })}
+              placeholder="Your Name"
+              className="w-full border rounded-lg p-3"
             />
+            {errors.name && (
+              <p className="text-red-500 text-sm">{errors.name.message}</p>
+            )}
           </div>
 
           {/* Email */}

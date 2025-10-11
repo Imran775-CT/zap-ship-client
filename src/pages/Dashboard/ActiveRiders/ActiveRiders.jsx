@@ -3,10 +3,10 @@ import Swal from "sweetalert2";
 import UseAxiosSecure from "../../../hooks/UseAxiosSecure";
 
 const ActiveRiders = () => {
-  const queryClient = useQueryClient();
   const axiosSecure = UseAxiosSecure();
+  const queryClient = useQueryClient();
 
-  // ✅ Active Riders load করা
+  // ✅ Load Active Riders
   const { data: activeRiders = [], isLoading } = useQuery({
     queryKey: ["activeRiders"],
     queryFn: async () => {
@@ -15,14 +15,17 @@ const ActiveRiders = () => {
     },
   });
 
-  // ✅ Deactivate rider mutation
+  // ✅ Deactivate mutation
   const mutation = useMutation({
     mutationFn: async (id) => {
       const res = await axiosSecure.patch(`/riders/deactivate/${id}`);
       return res.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(["activeRiders"]); // auto refresh
+    onSuccess: (_, id) => {
+      // Active list থেকে remove
+      queryClient.setQueryData(["activeRiders"], (oldData) =>
+        oldData.filter((rider) => rider._id !== id)
+      );
     },
   });
 
@@ -48,7 +51,7 @@ const ActiveRiders = () => {
     });
   };
 
-  // ✅ View handler
+  // ✅ View rider details
   const handleView = (rider) => {
     Swal.fire({
       title: `<strong>${rider.name}</strong>`,
@@ -93,7 +96,7 @@ const ActiveRiders = () => {
                 <td>{rider.phone}</td>
                 <td>{rider.bikeBrand}</td>
                 <td className="flex gap-2">
-                  {/* ✅ Activated marked button */}
+                  {/* ✅ Activated badge */}
                   <span className="px-3 py-1 rounded-full text-white font-semibold bg-sky-500 cursor-default">
                     Activated
                   </span>
@@ -113,6 +116,13 @@ const ActiveRiders = () => {
                 </td>
               </tr>
             ))}
+            {activeRiders.length === 0 && (
+              <tr>
+                <td colSpan="6" className="text-center py-4">
+                  No active riders
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

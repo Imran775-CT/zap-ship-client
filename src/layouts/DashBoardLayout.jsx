@@ -112,6 +112,14 @@ const DashBoardLayout = () => {
               <FiClock /> Pending Riders
             </NavLink>
           </li>
+          <li>
+            <NavLink
+              to="/dashboard/make-admin"
+              className="flex items-center gap-2"
+            >
+              <FiClock /> Make Admin
+            </NavLink>
+          </li>
         </ul>
       </div>
     </div>
